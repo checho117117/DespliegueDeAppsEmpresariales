@@ -1,0 +1,5 @@
+app_user: "avrserver"
+http_host: "avalenzuela.com"
+http_conf: "avalenzuela.com.conf"
+http_port: "80"
+disable_default: true
