@@ -1,0 +1,70 @@
+---
+- hosts: all
+  become: true
+  vars_files:
+    - cons2.yml
+
+  tasks:
+    - name: Crear documento raiz
+      file:
+        path: "/var/www/{{ http_host }}"
+        state: directory
+        owner: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Configurar el VirtualHost
+      template:
+        src: "app.avalenzuela.com.conf"
+        dest: "/etc/apache2/sites-available/{{ http_conf }}"
+      notify: Reload Apache
+
+    - name: Enable new site
+      shell: /usr/sbin/a2ensite {{ http_conf }}
+      notify: Reload Apache         
+# Configuracion de MySQL 
+    - name: Poner contrasena al usuario raiz
+      mysql_user:
+        login_user: root
+        login_password: "117118"
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Removes the MySQL test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+  # Configuracion de UFW 
+    - name: "UFW - Allow HTTP on port {{ http_port }}"
+      ufw:
+        rule: allow
+        port: "{{ http_port }}"
+        proto: tcp
+
+  # Pasar nuestro directorio con sitio web 
+    - name: Copiar directorio a servidor remoto
+      copy:
+        src: "paginasTarea/MVC(Petshop)"
+        dest: "/var/www/{{ http_host }}/"
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
