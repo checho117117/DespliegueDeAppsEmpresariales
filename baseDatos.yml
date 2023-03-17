@@ -1,0 +1,10 @@
+- hosts: all
+  become: true
+
+  tasks:
+    - name: crear una db
+      mysql_db: name=users state=present login_user=root login_password="117118"
+    - name: agregar datos en la tabla
+      copy: src=script.sql dest=/tmp/script.sql
+    - name: insertar datos en la tabla
+      mysql_db: name=users state=import target=/tmp/script.sql login_user=root login_password="117118"
