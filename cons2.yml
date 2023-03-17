@@ -1,0 +1,6 @@
+app_user: "avrserver"
+http_host: "app.avalenzuela.com"
+http_conf: "app.avalenzuela.com.conf"
+http_port: "80"
+disable_default: true
+mysql_root_password: 117118
